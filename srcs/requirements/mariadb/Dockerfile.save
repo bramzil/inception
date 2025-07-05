@@ -1,0 +1,19 @@
+FROM	debian:stable-slim
+
+COPY	./tools/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+
+RUN	chmod +x /usr/local/bin/docker-entrypoint.sh
+
+RUN	apt-get update && \
+	apt-get upgrade && \
+	apt-get install -y --no-install-recommends mariadb-server sudo
+
+RUN	chown mysql:mysql /var/lib/mysql && \
+	mkdir /run/mysqld &&  \
+	chown mysql:mysql /run/mysqld
+
+CMD	[ "sudo", "-u", "mysql", "mysqld" ]
+
+ENTRYPOINT [ "docker-entrypoint.sh" ]
+
+HEALTHCHECK CMD mysqladmin -u root -p"$DB_ROOT_PASSWORD" ping --silent

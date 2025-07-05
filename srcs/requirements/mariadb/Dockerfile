@@ -1,11 +1,15 @@
-FROM debian:latest
+FROM	debian:bullseye
 
-RUN	apt update -y &&  apt upgrade -y && \
-	apt install mariadb-server mariadb-client --no-install-recommends -y && \
+RUN	apt-get update && \
+	apt-get upgrade && \
+	apt-get install -y --no-install-recommends mariadb-server sudo && \
 	rm -rf /var/lib/apt/lists/*
- 
-COPY	./tools/docker-entrypoint.sh /usr/local/bin/
 
-CMD [ "mysqld", "--user=mysql" ]
+RUN	mkdir /run/mysqld && chown mysql:mysql /run/mysqld && \
+	chown mysql:mysql /var/lib/mysql
+
+CMD	[ "sudo", "-u", "mysql", "mysqld" ]
 
 ENTRYPOINT [ "docker-entrypoint.sh" ]
+
+HEALTHCHECK	CMD healthcheck.sh

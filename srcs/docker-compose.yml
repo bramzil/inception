@@ -1,0 +1,152 @@
+version: "3.8"
+
+services:
+
+  nginx:
+    image: nginx:bramzil
+
+    build: ./requirements/nginx
+
+    container_name: nginx
+
+    depends_on:
+      wordpress:
+        condition: service_started
+        restart: true
+
+    env_file:
+      - path: ./.env
+        required: true
+
+    secrets:
+      - bramzil.42.fr.key.pem
+      - bramzil.42.fr.cert.pem
+
+    configs:
+      - source: default
+        target: /etc/nginx/sites-available/default
+
+    ports:
+      - 8080:443
+
+    networks:
+      - mynet
+
+    volumes:
+      - wordpress:/var/www/html/wordpress
+
+  wordpress:
+    image: wordpress:bramzil
+
+    build: ./requirements/wordpress
+
+    container_name: wordpress
+
+    depends_on:
+      mariadb:
+        condition: service_healthy
+        restart: true
+
+      redis:
+        condition: service_healthy
+        restart: true
+
+    env_file:
+      - path: ./.env
+        required: true
+
+    secrets:
+      - wp_user_password.txt
+      - wp_admin_password.txt
+
+    configs:
+      - source: www.conf
+        target: /etc/php/7.4/fpm/pool.d/www.conf
+
+    networks:
+      - mynet
+
+    volumes:
+      - wordpress:/var/www/html/wordpress
+      - ./requirements/wordpress/tools/docker-entrypoint.sh:/usr/local/bin/docker-entrypoint.sh
+
+  mariadb:
+    image: mariadb:bramzil
+
+    container_name: mariadb
+
+    build: ./requirements/mariadb
+
+    env_file:
+      - path: ./.env
+        required: true
+
+    secrets:
+      - wp_user_password.txt
+      - db_root_password.txt
+
+    configs:
+      - source: 50-server.cnf
+        target: /etc/mysql/mariadb.conf.d/50-server.cnf
+
+    networks:
+      - mynet
+
+    volumes:
+      - mariadb:/var/lib/mysql
+      - ./requirements/mariadb/tools/docker-entrypoint.sh:/usr/local/bin/docker-entrypoint.sh
+      - ./requirements/mariadb/tools/healthcheck.sh:/usr/local/bin/healthcheck.sh
+
+  redis:
+    image: redis:bramzil
+
+    build: ./requirements/bonus/redis
+
+    container_name: redis
+
+    networks:
+      - mynet
+
+    volumes:
+      - wordpress:/data
+
+networks:
+  mynet:
+
+secrets:
+  wp_user_password.txt:
+    file: ../secrets/wp_user_password.txt
+  db_root_password.txt:
+    file: ../secrets/db_root_password.txt
+  wp_admin_password.txt:
+    file: ../secrets/wp_admin_password.txt
+  bramzil.42.fr.key.pem:
+    file: ../secrets/bramzil.42.fr.key.pem
+  bramzil.42.fr.cert.pem:
+    file: ../secrets/bramzil.42.fr.cert.pem
+
+configs:
+  default:
+    file: ./requirements/nginx/config/default
+
+  50-server.cnf:
+    file: ./requirements/mariadb/config/50-server.cnf
+
+  www.conf:
+    file: ./requirements/wordpress/config/www.conf
+
+volumes:
+  mariadb:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/bramzil/data/DB
+      o: bind
+
+  wordpress:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/bramzil/data/wordpress
+      o: bind
+

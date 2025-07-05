@@ -1,59 +1,43 @@
 #!/bin/bash
 
-set -euo pipefail
+set -eo pipefail
 
-WP_USER_PASSWORD=$(cat /run/secrets/wp_user_password.txt)
-WP_ROOT_PASSWORD=$(cat /run/secrets/wp_root_password.txt)
-
-log() {
-	echo "$(date +'%y%m%d %H:%M:%S'): [entrypoint]: $@" ;
+log () {
+	echo "$(date '+%Y-%m-%d %H:%M:%S') [ entrypoint ] $@"
 }
 
-# Initialize mariadb if it is not yet.
+DB_ROOT_PASSWORD=$(cat /run/secrets/db_root_password.txt)
+WP_USER_PASSWORD=$(cat /run/secrets/wp_user_password.txt)
 
-log "Install mariadb if it is not"
+chown -R mysql:mysql /var/lib/mysql
 
-mysql_install_db
+sudo -u mysql mysqld --skip-networking &
 
-# this section  for runtime unix socket directory.
+log "launch mariadb temoprary for setup"
 
-if [ ! -d "/run/mysqld" ]; then
-	mkdir /run/mysqld;
-	chown mysql:mysql /run/mysqld
-fi
+log "wait mariadb to start"
 
-# this section for setup mariadb if it not yet.
-
-log "Start mariadb temporary for setup"
-
-mysqld_safe --skip-network &
-
-pid="$!"
-
-log "wait mysql to start."
-
-while ! mysqladmin ping; do
-	sleep 1 ;
+while ! mysqladmin ping --silent; do
+	sleep 1
 done
 
-log "mariadb start successfully"
+if mysql -u root -e "quit" &> /dev/null ; then
+	mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '$DB_ROOT_PASSWORD';"
+	log "mariadb root's password set successfully"
+else
+	log "mariadb root's password set already"
 
-mysql << lim
-	CREATE DATABASE IF NOT EXISTS $WP_DATABASE_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-	CREATE USER IF NOT EXISTS '$WP_USER'@'$WP_HOST' IDENTIFIED BY '$WP_USER_PASSWORD';
-	GRANT ALL PRIVILEGES ON $WP_DATABASE_NAME.* TO '$WP_USER'@'$WP_HOST';
-	CREATE USER IF NOT EXISTS '$WP_ROOT'@'%' IDENTIFIED BY '$WP_ROOT_PASSWORD';
-	GRANT ALL PRIVILEGES ON *.* TO '$WP_ROOT'@'%';
+fi
+
+log "set wordpress database if it is not"
+
+mysql -u root -p"$DB_ROOT_PASSWORD" << lim
+	CREATE DATABASE IF NOT EXISTS $WP_DATABASE;
+	CREATE USER IF NOT EXISTS '$WP_USER'@'%' IDENTIFIED BY '$WP_USER_PASSWORD';
+	GRANT ALL PRIVILEGES ON $WP_DATABASE.* TO '$WP_USER'@'%';
 	FLUSH PRIVILEGES;
 lim
 
-mysqladmin shutdown
+mysqladmin -u root -p"$DB_ROOT_PASSWORD" shutdown
 
-wait "$pid"
-
-log "stop mariadb server"
-
-# now this is the time to start owr mariadb
-log "Launch mariadb server"
-
-exec "$@" 
+$@

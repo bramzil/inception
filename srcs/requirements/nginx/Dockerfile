@@ -1,12 +1,11 @@
-FROM debian:latest
+FROM	debian:bullseye
 
-COPY ./tools/entrypoint.sh /usr/local/bin/entrypoint.sh
-
-RUN chmod +x /usr/local/bin/entrypoint.sh
-
-RUN apt update && apt install -y nginx openssl --no-install-recommends && \
+RUN	apt-get update -y && \
+	apt-get upgrade -y && \
+	apt-get install -y --no-install-recommends nginx openssl && \
 	rm -rf /var/lib/apt/lists/*
 
-CMD [ "nginx", "-g", "daemon off;" ]
+RUN	mkdir -p /var/www/html/wordpress && \
+	chown -R www-data:www-data /var/www
 
-ENTRYPOINT [ "entrypoint.sh" ]
+ENTRYPOINT [ "nginx", "-g", "daemon off;" ]
