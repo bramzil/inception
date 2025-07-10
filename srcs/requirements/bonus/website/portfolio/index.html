@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>My Portfolio</title>
+  <style>
+    /* Reset some defaults */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f7fa;
+      color: #333;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    header {
+      width: 100%;
+      max-width: 900px;
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    header h1 {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+      color: #2c3e50;
+    }
+
+    header p {
+      font-size: 1.2rem;
+      color: #7f8c8d;
+    }
+
+    main {
+      width: 100%;
+      max-width: 900px;
+    }
+
+    section {
+      margin-bottom: 40px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgb(0 0 0 / 0.1);
+    }
+
+    section h2 {
+      margin-bottom: 20px;
+      color: #34495e;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 8px;
+      font-weight: 600;
+    }
+
+    /* About Me */
+    #about p {
+      font-size: 1rem;
+      color: #555;
+    }
+
+    /* Skills */
+    #skills ul {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    #skills li {
+      background: #3498db;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      box-shadow: 0 2px 4px rgb(0 0 0 / 0.1);
+      transition: background-color 0.3s ease;
+    }
+
+    #skills li:hover {
+      background: #2980b9;
+      cursor: default;
+    }
+
+    /* Projects */
+    #projects .project {
+      margin-bottom: 20px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 15px;
+    }
+
+    #projects .project:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    #projects .project h3 {
+      margin-bottom: 8px;
+      color: #2c3e50;
+    }
+
+    #projects .project p {
+      color: #666;
+      font-size: 0.95rem;
+      margin-bottom: 5px;
+    }
+
+    #projects .project a {
+      color: #3498db;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    #projects .project a:hover {
+      text-decoration: underline;
+    }
+
+    /* Contact */
+    #contact p {
+      font-size: 1rem;
+      color: #555;
+    }
+
+    #contact a {
+      color: #3498db;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    #contact a:hover {
+      text-decoration: underline;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      body {
+        padding: 15px;
+      }
+
+      header h1 {
+        font-size: 2.2rem;
+      }
+
+      #skills ul {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Jane Doe</h1>
+    <p>Frontend Developer | UI/UX Enthusiast | Problem Solver</p>
+  </header>
+
+  <main>
+    <section id="about">
+      <h2>About Me</h2>
+      <p>
+        Passionate web developer with 4 years of experience creating beautiful and functional websites.
+        Skilled in HTML, CSS, JavaScript, and React. Always eager to learn and improve.
+      </p>
+    </section>
+
+    <section id="skills">
+      <h2>Skills</h2>
+      <ul>
+        <li>HTML5</li>
+        <li>CSS3</li>
+        <li>JavaScript</li>
+        <li>React</li>
+        <li>Node.js</li>
+        <li>Git</li>
+        <li>Responsive Design</li>
+      </ul>
+    </section>
+
+    <section id="projects">
+      <h2>Projects</h2>
+
+      <div class="project">
+        <h3>Portfolio Website</h3>
+        <p>A responsive and modern portfolio website built with React.</p>
+        <a href="https://github.com/janedoe/portfolio" target="_blank" rel="noopener noreferrer">View on GitHub</a>
+      </div>
+
+      <div class="project">
+        <h3>Weather App</h3>
+        <p>Real-time weather forecast app using OpenWeatherMap API and vanilla JavaScript.</p>
+        <a href="https://github.com/janedoe/weather-app" target="_blank" rel="noopener noreferrer">View on GitHub</a>
+      </div>
+
+      <div class="project">
+        <h3>Task Manager</h3>
+        <p>A simple task management app with CRUD operations using Node.js and Express.</p>
+        <a href="https://github.com/janedoe/task-manager" target="_blank" rel="noopener noreferrer">View on GitHub</a>
+      </div>
+    </section>
+
+    <section id="contact">
+      <h2>Contact</h2>
+      <p>Email: <a href="mailto:jane.doe@example.com">jane.doe@example.com</a></p>
+      <p>LinkedIn: <a href="https://linkedin.com/in/janedoe" target="_blank" rel="noopener noreferrer">linkedin.com/in/janedoe</a></p>
+    </section>
+  </main>
+</body>
+</html>

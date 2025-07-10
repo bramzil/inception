@@ -22,6 +22,7 @@
 server {
     listen              443 ssl;
     server_name         bramzil.42.fr;
+
     ssl_certificate     /run/secrets/bramzil.42.fr.cert.pem;
     ssl_certificate_key /run/secrets/bramzil.42.fr.key.pem;
     ssl_protocols       TLSv1.2 TLSv1.3;
@@ -29,9 +30,6 @@ server {
 
     root /var/www/html/wordpress;
     index index.php index.html index.htm;
-
-    access_log /var/log/nginx/wordpress.access.log;
-    error_log  /var/log/nginx/wordpress.error.log;
 
     location / {
         try_files $uri $uri/ /index.php?$args;
@@ -46,6 +44,43 @@ server {
 
     location ~ /\.ht {
         deny all;
+    }
+}
+
+server {
+    listen              443 ssl;
+    server_name         adminer.bramzil.42.fr;
+
+    ssl_certificate     /run/secrets/bramzil.42.fr.cert.pem;
+    ssl_certificate_key /run/secrets/bramzil.42.fr.key.pem;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
+
+    root                /var/www/html;
+
+    location / {
+        return 302 /adminer.php;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass adminer:9000;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+}
+
+server {
+    listen 443 ssl;
+    server_name portfolio.bramzil.42.fr;
+
+    ssl_certificate     /run/secrets/bramzil.42.fr.cert.pem;
+    ssl_certificate_key /run/secrets/bramzil.42.fr.key.pem;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
+
+    location / {
+        proxy_pass http://website:80;
+	proxy_set_header Host portfolio.bramzil.42.fr;
     }
 }
 
