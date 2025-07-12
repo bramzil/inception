@@ -31,7 +31,7 @@ services:
       - 443:443
 
     networks:
-      - mynet
+      - intranet
 
     volumes:
       - wordpress:/var/www/html/wordpress
@@ -67,7 +67,7 @@ services:
         target: /var/www/html/wordpress/wp-config.php
 
     networks:
-      - mynet
+      - intranet
 
     volumes:
       - wordpress:/var/www/html/wordpress
@@ -93,7 +93,7 @@ services:
         target: /etc/mysql/mariadb.conf.d/50-server.cnf
 
     networks:
-      - mynet
+      - intranet
 
     volumes:
       - mariadb:/var/lib/mysql
@@ -108,7 +108,7 @@ services:
     container_name: redis
 
     networks:
-      - mynet
+      - intranet
 
   FTP:
     image: ftp:bramzil
@@ -147,7 +147,7 @@ services:
         target: /etc/php/7.4/fpm/pool.d/www.conf
 
     networks:
-      - mynet
+      - intranet
 
   website:
     image: website:bramzil
@@ -164,10 +164,30 @@ services:
       - ./requirements/bonus/website/portfolio:/var/www/html/portfolio
 
     networks:
-      - mynet
+      - intranet
+
+  cadvisor:
+    image: cadvisor:bramzil
+
+    build: ./requirements/bonus/cadvisor
+
+    container_name: cadvisor
+
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+
+    ports:
+      - 8080:8080
+
+    networks:
+      - intranet
 
 networks:
-  mynet:
+  intranet:
 
 secrets:
   wp_user_password.txt:
@@ -222,3 +242,9 @@ volumes:
       device: /home/bramzil/data/wordpress
       o: bind
 
+  prometheus:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/bramzil/data/prometheus
+      o: bind
