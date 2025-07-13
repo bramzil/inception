@@ -1,12 +1,8 @@
 services:
-
   nginx:
-    image: nginx:bramzil
-
-    build: ./requirements/nginx
-
     container_name: nginx
-
+    image: nginx:bramzil
+    build: ./requirements/nginx
     depends_on:
       wordpress:
         condition: service_started
@@ -14,175 +10,143 @@ services:
         condition: service_started
       website:
         condition: service_started
-
     env_file:
       - path: ./.env
         required: true
-
     secrets:
       - bramzil.42.fr.key.pem
       - bramzil.42.fr.cert.pem
-
     configs:
       - source: main_default
         target: /etc/nginx/sites-available/default
-
     ports:
       - 443:443
-
     networks:
       - intranet
-
     volumes:
       - wordpress:/var/www/html/wordpress
 
   wordpress:
-    image: wordpress:bramzil
-
-    build: ./requirements/wordpress
-
     container_name: wordpress
-
+    image: wordpress:bramzil
+    build: ./requirements/wordpress
     depends_on:
       mariadb:
         condition: service_healthy
         restart: true
-
       redis:
         condition: service_healthy
         restart: true
-
     env_file:
       - path: ./.env
         required: true
-
     secrets:
       - wp_user_password.txt
       - wp_admin_password.txt
-
     configs:
       - source: www.conf
         target: /etc/php/7.4/fpm/pool.d/www.conf
       - source: wp-config.php
         target: /var/www/html/wordpress/wp-config.php
-
     networks:
       - intranet
-
     volumes:
       - wordpress:/var/www/html/wordpress
-      - ./requirements/wordpress/tools/docker-entrypoint.sh:/usr/local/bin/docker-entrypoint.sh
+      - ./requirements/wordpress/tools/entrypoint.sh:/usr/local/bin/entrypoint.sh
 
   mariadb:
-    image: mariadb:bramzil
-
     container_name: mariadb
-
+    image: mariadb:bramzil
     build: ./requirements/mariadb
-
     env_file:
       - path: ./.env
         required: true
-
     secrets:
       - wp_user_password.txt
       - db_root_password.txt
-
+      - wp_admin_password.txt
     configs:
       - source: 50-server.cnf
         target: /etc/mysql/mariadb.conf.d/50-server.cnf
-
     networks:
       - intranet
-
     volumes:
       - mariadb:/var/lib/mysql
-      - ./requirements/mariadb/tools/docker-entrypoint.sh:/usr/local/bin/docker-entrypoint.sh
+      - ./requirements/mariadb/tools/entrypoint.sh:/usr/local/bin/entrypoint.sh
       - ./requirements/mariadb/tools/healthcheck.sh:/usr/local/bin/healthcheck.sh
 
   redis:
-    image: redis:bramzil
-
-    build: ./requirements/bonus/redis
-
     container_name: redis
-
+    image: redis:bramzil
+    build: ./requirements/bonus/redis
     networks:
       - intranet
 
   FTP:
+    container_name: ftp
     image: ftp:bramzil
-
     build: ./requirements/bonus/FTP
-
-    container_name: FTP
-
     env_file:
       - path: ./.env
         required: true
-
     volumes:
       - wordpress:/var/lib/wordpress
-
     secrets:
       - ftp_user_password.txt
-
     configs:
       - source: vsftpd.conf
         target: /etc/vsftpd.conf
-
     ports:
       - 21:21
       - 40000-40020:40000-40020
 
   adminer:
-    image: adminer:bramzil
-
-    build: ./requirements/bonus/adminer
-
     container_name: adminer
-
+    image: adminer:bramzil
+    build: ./requirements/bonus/adminer
     configs:
       - source: www.conf
         target: /etc/php/7.4/fpm/pool.d/www.conf
-
     networks:
       - intranet
 
   website:
-    image: website:bramzil
-
-    build: ./requirements/bonus/website
-
     container_name: website
-
+    image: website:bramzil
+    build: ./requirements/bonus/website
     configs:
       - source: website_default
         target: /etc/nginx/sites-available/default
-
     volumes:
       - ./requirements/bonus/website/portfolio:/var/www/html/portfolio
+    networks:
+      - intranet
 
+  prometheus:
+    container_name: prometheus
+    image: prometheus:bramzil
+    build: ./requirements/bonus/prometheus
+    depends_on:
+      cadvisor:
+        condition: service_started
+    configs:
+      - source: prometheus.yml
+        target: /usr/local/prometheus-3.5.0-rc.1.linux-amd64/prometheus.yml
+    volumes:
+      - prometheus:/srv/prometheus/data
     networks:
       - intranet
 
   cadvisor:
-    image: cadvisor:bramzil
-
-    build: ./requirements/bonus/cadvisor
-
     container_name: cadvisor
-
+    image: cadvisor:bramzil
+    build: ./requirements/bonus/cadvisor
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
-
-    ports:
-      - 8080:8080
-
     networks:
       - intranet
 
@@ -192,40 +156,32 @@ networks:
 secrets:
   wp_user_password.txt:
     file: ../secrets/wp_user_password.txt
-
   db_root_password.txt:
     file: ../secrets/db_root_password.txt
-
   wp_admin_password.txt:
     file: ../secrets/wp_admin_password.txt
-
   bramzil.42.fr.key.pem:
     file: ../secrets/bramzil.42.fr.key.pem
-
   bramzil.42.fr.cert.pem:
     file: ../secrets/bramzil.42.fr.cert.pem
-
   ftp_user_password.txt:
     file: ../secrets/ftp_user_password.txt
 
 configs:
   main_default:
     file: ./requirements/nginx/config/default
-
   50-server.cnf:
     file: ./requirements/mariadb/config/50-server.cnf
-
   www.conf:
     file: ./requirements/wordpress/config/www.conf
-
   wp-config.php:
     file: ./requirements/wordpress/config/wp-config.php
-
   vsftpd.conf:
     file: ./requirements/bonus/FTP/config/vsftpd.conf
-
   website_default:
     file: ./requirements/bonus/website/config/default
+  prometheus.yml:
+    file: ./requirements/bonus/prometheus/config/prometheus.yml
 
 volumes:
   mariadb:
@@ -234,14 +190,12 @@ volumes:
       type: none
       device: /home/bramzil/data/DB
       o: bind
-
   wordpress:
     driver: local
     driver_opts:
       type: none
       device: /home/bramzil/data/wordpress
       o: bind
-
   prometheus:
     driver: local
     driver_opts:

@@ -18,6 +18,6 @@ RUN	mkdir /run/php && \
 
 CMD	[ "php-fpm7.4", "-F" ]
 
-ENTRYPOINT [ "docker-entrypoint.sh" ]
+ENTRYPOINT [ "entrypoint.sh" ]
 
 HEALTHCHECK CMD nc -z 127.0.0.1 9000 || exit 1

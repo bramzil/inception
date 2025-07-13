@@ -22,6 +22,4 @@ FROM	debian:bullseye
 
 COPY	--from=build /usr/local/bin/cadvisor /usr/local/bin/cadvisor
 
-EXPOSE	8080
-
 ENTRYPOINT [ "cadvisor" ]

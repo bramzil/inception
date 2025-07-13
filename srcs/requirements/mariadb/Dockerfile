@@ -10,6 +10,6 @@ RUN	mkdir /run/mysqld && chown mysql:mysql /run/mysqld && \
 
 CMD	[ "sudo", "-u", "mysql", "mysqld" ]
 
-ENTRYPOINT [ "docker-entrypoint.sh" ]
+ENTRYPOINT [ "entrypoint.sh" ]
 
 HEALTHCHECK	CMD healthcheck.sh
