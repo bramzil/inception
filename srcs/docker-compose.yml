@@ -3,6 +3,7 @@ services:
     container_name: nginx
     image: nginx:bramzil
     build: ./requirements/nginx
+    restart: always
     depends_on:
       wordpress:
         condition: service_started
@@ -30,6 +31,7 @@ services:
     container_name: wordpress
     image: wordpress:bramzil
     build: ./requirements/wordpress
+    restart: always
     depends_on:
       mariadb:
         condition: service_healthy
@@ -58,6 +60,7 @@ services:
     container_name: mariadb
     image: mariadb:bramzil
     build: ./requirements/mariadb
+    restart: always
     env_file:
       - path: ./.env
         required: true
@@ -79,6 +82,7 @@ services:
     container_name: redis
     image: redis:bramzil
     build: ./requirements/bonus/redis
+    restart: always
     networks:
       - intranet
 
@@ -86,6 +90,7 @@ services:
     container_name: ftp
     image: ftp:bramzil
     build: ./requirements/bonus/FTP
+    restart: always
     env_file:
       - path: ./.env
         required: true
@@ -104,6 +109,7 @@ services:
     container_name: adminer
     image: adminer:bramzil
     build: ./requirements/bonus/adminer
+    restart: always
     configs:
       - source: www.conf
         target: /etc/php/7.4/fpm/pool.d/www.conf
@@ -114,6 +120,7 @@ services:
     container_name: website
     image: website:bramzil
     build: ./requirements/bonus/website
+    restart: always
     configs:
       - source: website_default
         target: /etc/nginx/sites-available/default
@@ -126,6 +133,7 @@ services:
     container_name: prometheus
     image: prometheus:bramzil
     build: ./requirements/bonus/prometheus
+    restart: always
     depends_on:
       cadvisor:
         condition: service_started
@@ -141,6 +149,7 @@ services:
     container_name: cadvisor
     image: cadvisor:bramzil
     build: ./requirements/bonus/cadvisor
+    restart: always
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
