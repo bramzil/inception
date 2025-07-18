@@ -67,7 +67,6 @@ services:
     secrets:
       - wp_user_password.txt
       - db_root_password.txt
-      - wp_admin_password.txt
     configs:
       - source: 50-server.cnf
         target: /etc/mysql/mariadb.conf.d/50-server.cnf
@@ -98,9 +97,6 @@ services:
       - wordpress:/var/lib/wordpress
     secrets:
       - ftp_user_password.txt
-    configs:
-      - source: vsftpd.conf
-        target: /etc/vsftpd.conf
     ports:
       - 21:21
       - 40000-40020:40000-40020

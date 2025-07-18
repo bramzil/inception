@@ -8,7 +8,6 @@ log () {
 
 DB_ROOT_PASSWORD=$(cat /run/secrets/db_root_password.txt)
 WP_USER_PASSWORD=$(cat /run/secrets/wp_user_password.txt)
-WP_ADMIN_PASSWORD=$(cat /run/secrets/wp_admin_password.txt)
 
 chown -R mysql:mysql /var/lib/mysql
 
@@ -34,10 +33,8 @@ log "set wordpress database if it is not"
 
 mysql -u root -p"$DB_ROOT_PASSWORD" << lim
 	CREATE DATABASE IF NOT EXISTS $WP_DATABASE;
-	CREATE USER IF NOT EXISTS '$WP_ADMIN'@'%' IDENTIFIED BY '$WP_ADMIN_PASSWORD';
-	GRANT ALL PRIVILEGES ON $WP_DATABASE.* TO '$WP_ADMIN'@'%';
-	CREATE USER IF NOT EXISTS '$WP_USER'@'%' IDENTIFIED BY '$WP_USER_PASSWORD';
-	GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER ON $WP_DATABASE.* TO '$WP_USER'@'%';
+	CREATE USER IF NOT EXISTS '$WP_DATABASE_USER'@'%' IDENTIFIED BY '$WP_USER_PASSWORD';
+	GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER ON $WP_DATABASE.* TO '$WP_DATABASE_USER'@'%';
 	FLUSH PRIVILEGES;
 lim
 
